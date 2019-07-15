@@ -66,7 +66,7 @@ class MyApplication:Application(){
 ```
 
 
-##Utilização
+## Utilização
 
 
 Detalhamos a seguir um exemplo de utilização de nossa biblioteca de como obter o hash do cartão de crédito:
@@ -118,7 +118,7 @@ Caso esteja utilizando a linguagem Java:
 ```
 
 
-##Funções Auxiliares
+## Funções Auxiliares
 
 A biblioteca disponibilizada também possui uma série de métodos auxiliares para a validação de dados do cartão de crédito, conforme demonstrado a seguir:
 
