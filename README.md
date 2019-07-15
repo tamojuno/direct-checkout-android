@@ -1,8 +1,7 @@
 
+# DirectCheckout Android
 
-# DirectCheckout
-
-SDK para criptografia e validação de dados do cartão de crédido para integração com a API de pagamentos da Juno/BoletoBancário.
+SDK para criptografia e validação de dados de cartão de crédido para integração com a API de pagamentos da Juno/BoletoBancário.
 
 Visando garantir a segurança das transações realizadas em nossa plataforma, a API da Juno adota uma política de criptografia dos dados de cartão de crédito de ponta-a-ponta.
 
@@ -120,6 +119,7 @@ Caso esteja utilizando a linguagem Java:
 
 
 ##Funções Auxiliares
+
 A biblioteca disponibilizada também possui uma série de métodos auxiliares para a validação de dados do cartão de crédito, conforme demonstrado a seguir:
 
 ```kotlin
