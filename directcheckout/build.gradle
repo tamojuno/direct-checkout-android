@@ -4,9 +4,13 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 
+tasks.withType(Javadoc).all {
+    enabled = false
+}
+
+
 ext {
-    bintrayRepo = 'maven'
-    bintrayName = 'DirectCheckout'
+    bintrayRepo = 'DirectCheckout'
 
     publishedGroupId = 'br.com.juno'
     libraryName = 'DirectCheckout'
@@ -14,10 +18,10 @@ ext {
 
     libraryDescription = 'Library for Juno clients get secure Credit Card Hash to make transactions'
 
-    siteUrl = 'https://junp.com.br'
+    siteUrl = 'https://juno.com.br'
     gitUrl = 'https://github.com/tamojuno/direct-checkout-android'
 
-    libraryVersion = '0.0.1'
+    libraryVersion = '0.0.2'
 
     developerId = 'dieffersonsantos'
     developerName = 'Diefferson Santos'
@@ -29,7 +33,7 @@ ext {
 }
 
 group = 'br.com.juno.directcheckout'
-version = '0.0.1'
+version = '0.0.2'
 
 android {
     compileSdkVersion 28
@@ -37,8 +41,8 @@ android {
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 1
-        versionName '0.0.1-AndroidSDK'
+        versionCode 2
+        versionName '0.0.2-AndroidSDK'
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         buildConfigField "String", "SANDBOX", project.sandboxURL
         buildConfigField "String", "PROD", project.prodURL
@@ -70,4 +74,4 @@ repositories {
     mavenCentral()
 }
 
-apply from: "bintry.gradle"
+apply from: rootProject.file("bintry.gradle")
