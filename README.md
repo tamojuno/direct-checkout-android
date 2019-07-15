@@ -15,7 +15,7 @@ Adicione o SDK nas pependências do seu aplicativo
 
 ```gradle
 dependencies {
-    implementation "br.com.juno:DirectCheckout:0.0.1"
+    implementation "br.com.juno:DirectCheckout:0.0.2"
 }
 ```
 
