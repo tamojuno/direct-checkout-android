@@ -15,7 +15,7 @@
 
         <meta-data
                 android:name="br.com.juno.directcheckout.public_token"
-                android:value="YOUR_PUBLIC_TOKEN"/>
+                android:value="705956B7E713A5EB9DF880ACD79D5D9E2B34033D057ECB714DF34033F051227C"/>
 
         <activity android:name=".TesteActivity">
             <intent-filter>

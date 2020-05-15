@@ -55,11 +55,23 @@ object DirectCheckout{
 
         val service = ApiFactory.makeRetrofitService(prodEnvironment)
         CoroutineScope(Dispatchers.IO).launch{
-            val response = service.getCardHash(publicToken, card.encrypt(publicKey?:""))
-            if(response.success){
-                listener.onSuccess(response.data)
-            }else{
-                listener.onFailure(DirectCheckoutException(response.errorMessage))
+            try{
+                val response = service.getCardHash(publicToken, card.encrypt(publicKey?:""))
+                if(response.success){
+                    withContext(Dispatchers.Main){
+                        listener.onSuccess(response.data)
+                    }
+
+                }else{
+                    withContext(Dispatchers.Main){
+                        listener.onFailure(DirectCheckoutException(response.errorMessage))
+                    }
+
+                }
+            }catch (e: Exception){
+                withContext(Dispatchers.Main) {
+                    listener.onFailure(DirectCheckoutException(e.message ?: "Network error"))
+                }
             }
         }
     }
@@ -133,14 +145,26 @@ object DirectCheckout{
     private fun loadPublicKey(listener:DirectCheckoutListener<Boolean>? = null){
         val service = ApiFactory.makeRetrofitService(prodEnvironment)
         CoroutineScope(Dispatchers.IO).launch{
-            val response = service.getPublicKey(publicToken, BuildConfig.VERSION_NAME)
-            if(response.success){
-                publicKey = response.data
-                listener?.onSuccess(true)
-            }else{
-                listener?.onFailure(DirectCheckoutException(response.errorMessage))
+            try{
+                val response = service.getPublicKey(publicToken, BuildConfig.VERSION_NAME)
+                if(response.success){
+                    publicKey = response.data
+                    withContext(Dispatchers.Main) {
+                        listener?.onSuccess(true)
+                    }
+                }else{
+                    withContext(Dispatchers.Main) {
+                        listener?.onFailure(DirectCheckoutException(response.errorMessage))
+                    }
+                    sdkInitialized = false
+                }
+            }catch (e: Exception){
+                withContext(Dispatchers.Main) {
+                    listener?.onFailure(DirectCheckoutException(e.message?: "Network error"))
+                }
                 sdkInitialized = false
             }
+
         }
     }
 
