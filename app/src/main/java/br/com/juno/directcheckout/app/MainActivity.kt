@@ -1,8 +1,8 @@
 package br.com.juno.directcheckout.app
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import br.com.juno.directcheckout.DirectCheckout
 import br.com.juno.directcheckout.model.Card
 import br.com.juno.directcheckout.model.DirectCheckoutException
