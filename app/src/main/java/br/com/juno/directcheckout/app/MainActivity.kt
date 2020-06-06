@@ -7,6 +7,7 @@ import br.com.juno.directcheckout.DirectCheckout
 import br.com.juno.directcheckout.model.Card
 import br.com.juno.directcheckout.model.DirectCheckoutException
 import br.com.juno.directcheckout.model.DirectCheckoutListener
+import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -14,6 +15,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        getCardHash.setOnClickListener {
+            getCardHash()
+        }
+
+    }
+
+    private fun getCardHash(){
         val card = Card(
             cardNumber = "5191865557386780",
             holderName = "Teste",
@@ -24,12 +32,12 @@ class MainActivity : AppCompatActivity() {
 
         DirectCheckout.getCardHash(card, object : DirectCheckoutListener<String> {
 
-            override fun onSuccess(cardHash: String) {
-                /* Sucesso - A variável cardHash conterá o hash do cartão de crédito */
+            override fun onSuccess(result: String) {
+                cardHash.text = result
             }
 
             override fun onFailure(exception: DirectCheckoutException) {
-                /* Erro - A variável exception conterá o erro ocorrido ao obter o hash */
+                cardHash.text = exception.message
             }
         })
     }

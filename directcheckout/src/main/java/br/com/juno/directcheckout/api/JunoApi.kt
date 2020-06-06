@@ -1,38 +1,35 @@
 package br.com.juno.directcheckout.api
 
-import br.com.juno.directcheckout.BuildConfig
-import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
-import okhttp3.OkHttpClient
+import org.json.JSONObject
 
-internal interface JunoApi {
+internal class JunoApi(private val httpClient: HttpClient) {
 
-    @FormUrlEncoded
-    @POST("get-public-encryption-key.json")
-    suspend fun getPublicKey(
-        @Field("publicToken") publicToken:String,
-        @Field("version") version:String
-    ) : ApiResponse
+    fun getPublicKey(publicToken:String, version:String) : ApiResponse {
 
-    @FormUrlEncoded
-    @POST("get-credit-card-hash.json")
-    suspend fun getCardHash(
-        @Field("publicToken") publicToken:String,
-        @Field("encryptedData") encryptedData:String
-    ):ApiResponse
+        val result = httpClient.post("get-public-encryption-key.json",
+            mapOf(
+                "publicToken" to publicToken,
+                "version" to version
+            )
+        )
+        return ApiResponse(JSONObject(result))
+    }
+
+    fun getCardHash(publicToken:String, encryptedData: String) : ApiResponse {
+
+        val result = httpClient.post("get-credit-card-hash.json",
+            mapOf(
+                "publicToken" to publicToken,
+                "encryptedData" to encryptedData
+            )
+        )
+        return ApiResponse(JSONObject(result))
+    }
 }
 
 internal object ApiFactory {
 
-    fun makeRetrofitService(prodEnvironment: Boolean): JunoApi {
-
-        return Retrofit.Builder()
-            .baseUrl(BuildConfig.PROD.takeIf { prodEnvironment }?: BuildConfig.SANDBOX)
-            .client(OkHttpClient.Builder().build())
-            .addConverterFactory(MoshiConverterFactory.create())
-            .build().create(JunoApi::class.java)
+    fun makeRetrofitService(prodEnvironment: Boolean) : JunoApi {
+        return JunoApi(HttpClient(prodEnvironment))
     }
 }

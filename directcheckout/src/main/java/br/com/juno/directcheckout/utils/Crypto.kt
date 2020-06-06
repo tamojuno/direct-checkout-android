@@ -1,8 +1,11 @@
 package br.com.juno.directcheckout.utils
 
 import android.util.Base64
+import android.util.Log
 import br.com.juno.directcheckout.model.Card
-import com.squareup.moshi.Moshi
+import br.com.juno.directcheckout.model.toMap
+import org.json.JSONObject
+import org.json.JSONStringer
 import java.security.KeyFactory
 import java.security.PublicKey
 import java.security.spec.MGF1ParameterSpec
@@ -19,10 +22,7 @@ internal object Crypto{
 }
 
 internal fun Card.encrypt(key:String):String{
-    val moshi = Moshi.Builder().build()
-    val jsonAdapter = moshi.adapter<Card>(Card::class.java)
-    val json = jsonAdapter.toJson(this)
-    return json.encrypt(key)
+    return JSONObject(toMap()).toString().encrypt(key)
 }
 
 internal fun String.encrypt(key: String):String{

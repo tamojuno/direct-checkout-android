@@ -2,6 +2,8 @@ package br.com.juno.directcheckout
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Handler
+import android.os.Looper
 import br.com.juno.directcheckout.api.ApiFactory
 import br.com.juno.directcheckout.model.Card
 import br.com.juno.directcheckout.model.DirectCheckoutException
@@ -10,7 +12,6 @@ import br.com.juno.directcheckout.utils.CardUtils
 import br.com.juno.directcheckout.utils.Validate
 import br.com.juno.directcheckout.utils.Validate.NO_INITIALIZED
 import br.com.juno.directcheckout.utils.encrypt
-import kotlinx.coroutines.*
 
 object DirectCheckout{
 
@@ -48,31 +49,37 @@ object DirectCheckout{
     fun getCardHash(card: Card, listener: DirectCheckoutListener<String>){
         validateInitialize()
 
-        //await publicKey load
-        while (publicKey == null) runBlocking{
-            delay(100)
+        onPublicKeyDone {
+            val service = ApiFactory.makeRetrofitService(prodEnvironment)
+            val thread = Thread(Runnable {
+                try{
+                    val response = service.getCardHash(publicToken, card.encrypt(publicKey?:""))
+                    if(response.success){
+                        Handler(Looper.getMainLooper()).post {
+                            listener.onSuccess(response.data)
+                        }
+                    }else{
+                        Handler(Looper.getMainLooper()).post {
+                            listener.onFailure(DirectCheckoutException(response.errorMessage))
+                        }
+                    }
+                }catch (e: Exception){
+                    Handler(Looper.getMainLooper()).post {
+                        listener.onFailure(DirectCheckoutException(e.message ?: "Network error"))
+                    }
+                }
+            })
+            thread.start()
         }
+    }
 
-        val service = ApiFactory.makeRetrofitService(prodEnvironment)
-        CoroutineScope(Dispatchers.IO).launch{
-            try{
-                val response = service.getCardHash(publicToken, card.encrypt(publicKey?:""))
-                if(response.success){
-                    withContext(Dispatchers.Main){
-                        listener.onSuccess(response.data)
-                    }
-
-                }else{
-                    withContext(Dispatchers.Main){
-                        listener.onFailure(DirectCheckoutException(response.errorMessage))
-                    }
-
-                }
-            }catch (e: Exception){
-                withContext(Dispatchers.Main) {
-                    listener.onFailure(DirectCheckoutException(e.message ?: "Network error"))
-                }
-            }
+    private fun onPublicKeyDone(action : () -> Unit ){
+        if(publicKey == null){
+            Handler().postDelayed({ // Do something after 5s = 5000ms
+                onPublicKeyDone(action)
+            }, 100)
+        }else{
+            action()
         }
     }
 
@@ -144,28 +151,29 @@ object DirectCheckout{
 
     private fun loadPublicKey(listener:DirectCheckoutListener<Boolean>? = null){
         val service = ApiFactory.makeRetrofitService(prodEnvironment)
-        CoroutineScope(Dispatchers.IO).launch{
+        val thread = Thread(Runnable {
             try{
                 val response = service.getPublicKey(publicToken, BuildConfig.VERSION_NAME)
                 if(response.success){
                     publicKey = response.data
-                    withContext(Dispatchers.Main) {
+                    Handler(Looper.getMainLooper()).post {
                         listener?.onSuccess(true)
                     }
+
                 }else{
-                    withContext(Dispatchers.Main) {
+                    Handler(Looper.getMainLooper()).post {
                         listener?.onFailure(DirectCheckoutException(response.errorMessage))
                     }
                     sdkInitialized = false
                 }
             }catch (e: Exception){
-                withContext(Dispatchers.Main) {
+                Handler(Looper.getMainLooper()).post {
                     listener?.onFailure(DirectCheckoutException(e.message?: "Network error"))
                 }
                 sdkInitialized = false
             }
-
-        }
+        })
+        thread.start()
     }
 
     private fun loadPublicTokenMetadata(){
@@ -175,7 +183,7 @@ object DirectCheckout{
                 applicationContext.packageName, PackageManager.GET_META_DATA
             )
             if (!::publicToken.isInitialized) {
-                val token = ai?.metaData?.get(PUBLIC_TOKEN)
+                val token = ai.metaData?.get(PUBLIC_TOKEN)
                 if (token is String) {
                     publicToken = token
                 } else {
