@@ -2,8 +2,10 @@ package br.com.juno.directcheckout
 
 import android.content.Context
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.text.Html
 import br.com.juno.directcheckout.api.ApiFactory
 import br.com.juno.directcheckout.model.Card
 import br.com.juno.directcheckout.model.DirectCheckoutException
@@ -47,7 +49,11 @@ object DirectCheckout{
      */
     @JvmStatic
     fun getCardHash(card: Card, listener: DirectCheckoutListener<String>){
-        validateInitialize()
+
+        if(!sdkInitialized){
+            listener.onFailure( DirectCheckoutException(NO_INITIALIZED))
+            return
+        }
 
         onPublicKeyDone {
             val service = ApiFactory.makeRetrofitService(prodEnvironment)
@@ -60,7 +66,7 @@ object DirectCheckout{
                         }
                     }else{
                         Handler(Looper.getMainLooper()).post {
-                            listener.onFailure(DirectCheckoutException(response.errorMessage))
+                            listener.onFailure(DirectCheckoutException(getErrorMessage(response.errorMessage)))
                         }
                     }
                 }catch (e: Exception){
@@ -162,11 +168,12 @@ object DirectCheckout{
 
                 }else{
                     Handler(Looper.getMainLooper()).post {
-                        listener?.onFailure(DirectCheckoutException(response.errorMessage))
+                        listener?.onFailure(DirectCheckoutException(getErrorMessage(response.errorMessage)))
                     }
                     sdkInitialized = false
                 }
             }catch (e: Exception){
+                e.printStackTrace()
                 Handler(Looper.getMainLooper()).post {
                     listener?.onFailure(DirectCheckoutException(e.message?: "Network error"))
                 }
@@ -200,5 +207,13 @@ object DirectCheckout{
         if(!sdkInitialized){
             throw DirectCheckoutException(NO_INITIALIZED)
         }
+    }
+
+    private fun getErrorMessage(errorMessage: String) : String {
+        return if (Build.VERSION.SDK_INT >= 24) {
+            Html.fromHtml(errorMessage , Html.FROM_HTML_MODE_LEGACY)
+        } else {
+            Html.fromHtml(errorMessage)
+        }.toString()
     }
 }
