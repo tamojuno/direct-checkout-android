@@ -11,11 +11,22 @@ Para mais informações acesse nossa página de integração:
 
 ## Setup
 
+
+Adicione o JitPack repository em seu build.gradle (top level module):
+```gradle
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}
+```
+
 Adicione o SDK nas dependências do seu aplicativo
 
 ```gradle
 dependencies {
-    implementation "br.com.juno:directcheckout:0.0.2"
+    implementation "com.github.tamojuno:direct-checkout-android:1.0.0"
 }
 ```
 
