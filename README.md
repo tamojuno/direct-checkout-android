@@ -26,7 +26,7 @@ Adicione o SDK nas dependências do seu aplicativo
 
 ```gradle
 dependencies {
-    implementation "com.github.tamojuno:direct-checkout-android:1.0.0"
+    implementation "com.github.tamojuno:direct-checkout-android:1.0.1"
 }
 ```
 
