@@ -1,16 +1,14 @@
 package br.com.juno.directcheckout.model
 
 import br.com.juno.directcheckout.utils.CardUtils
-import com.squareup.moshi.Json
-import java.util.*
 
 class Card (cardNumber: String,
-            @Json(name = "holderName") val holderName: String,
-            @Json(name = "securityCode") val securityCode: String,
-            @Json(name = "expirationMonth") val expirationMonth: String,
-            @Json(name = "expirationYear") val expirationYear: String){
+            val holderName: String,
+            val securityCode: String,
+            val expirationMonth: String,
+            val expirationYear: String){
 
-    @Json(name = "cardNumber") val cardNumber = cardNumber.replace(" ", "")
+    val cardNumber = cardNumber.replace(" ", "")
 
     fun getType() = CardUtils.getCardType(cardNumber)?.name
 
@@ -21,3 +19,11 @@ class Card (cardNumber: String,
     fun validateExpireDate() = CardUtils.validateExpireDate(expirationMonth, expirationYear)
 
 }
+
+fun Card.toMap():Map<String,Any>  = mapOf(
+    "cardNumber" to cardNumber,
+    "holderName" to holderName,
+    "securityCode" to securityCode,
+    "expirationMonth" to expirationMonth,
+    "expirationYear" to expirationYear
+)
