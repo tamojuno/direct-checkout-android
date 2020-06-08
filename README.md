@@ -177,6 +177,12 @@ Algumas funções também podem ser acessadas diretamente da classe Card:
 
 ```
 
+## Proguard
+```
+-keep class br.com.juno.** { *; }
+```
+
+
 ## Contato 
 
 Para mais informações entre em contato com a Juno:
