@@ -15,9 +15,10 @@ import br.com.juno.directcheckout.utils.Validate
 import br.com.juno.directcheckout.utils.Validate.NO_INITIALIZED
 import br.com.juno.directcheckout.utils.encrypt
 
-object DirectCheckout{
+object  DirectCheckout{
 
     private const val PUBLIC_TOKEN = "br.com.juno.directcheckout.public_token"
+    private const val PUBLIC_TOKEN_SANDBOX = "br.com.juno.directcheckout.public_token_sandbox"
 
     @JvmStatic private lateinit var applicationContext: Context
     @JvmStatic private lateinit var publicToken: String
@@ -190,7 +191,10 @@ object DirectCheckout{
                 applicationContext.packageName, PackageManager.GET_META_DATA
             )
             if (!::publicToken.isInitialized) {
-                val token = ai.metaData?.get(PUBLIC_TOKEN)
+                var token = ai.metaData?.get(PUBLIC_TOKEN)
+                if (!prodEnvironment && ai.metaData.get(PUBLIC_TOKEN_SANDBOX) is String) {
+                    token = ai.metaData.get(PUBLIC_TOKEN_SANDBOX)
+                }
                 if (token is String) {
                     publicToken = token
                 } else {

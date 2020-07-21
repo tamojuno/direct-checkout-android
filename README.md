@@ -26,7 +26,7 @@ Adicione o SDK nas dependências do seu aplicativo
 
 ```gradle
 dependencies {
-    implementation "com.github.tamojuno:direct-checkout-android:1.0.1"
+    implementation "com.github.rafaeldalbosco:direct-checkout-android:1.0.2"
 }
 ```
 
@@ -45,6 +45,9 @@ No arquivo Manifest adicione a permissão de acesso à internet, e seu token pú
         <meta-data
                 android:name="br.com.juno.directcheckout.public_token"
                 android:value="YOUR_PUBLIC_TOKEN"/>
+        <meta-data
+                android:name="br.com.juno.directcheckout.public_token_sandbox"
+                android:value="YOUR_PUBLIC_TOKEN_SANDBOX"/>
 
             ...
 
