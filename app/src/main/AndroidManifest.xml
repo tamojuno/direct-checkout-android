@@ -14,8 +14,11 @@
             android:name=".MyApplication">
 
         <meta-data
-                android:name="br.com.juno.directcheckout.public_token"
-                android:value="YOUR_TOKEN_HERE"/>
+            android:name="br.com.juno.directcheckout.public_token"
+            android:value="YOUR_PUBLIC_TOKEN"/>
+        <meta-data
+            android:name="br.com.juno.directcheckout.public_token_sandbox"
+            android:value="YOUR_PUBLIC_TOKEN_SANDBOX"/>
 
         <activity android:name=".MainActivity">
             <intent-filter>
