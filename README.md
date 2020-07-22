@@ -1,8 +1,7 @@
 
+# DirectCheckout Android
 
-# DirectCheckout
-
-SDK para criptografia e validação de dados do cartão de crédido para integração com a API de pagamentos da Juno/BoletoBancário.
+SDK para criptografia e validação de dados de cartão de crédito para integração com a API de pagamentos da Juno/BoletoBancário.
 
 Visando garantir a segurança das transações realizadas em nossa plataforma, a API da Juno adota uma política de criptografia dos dados de cartão de crédito de ponta-a-ponta.
 
@@ -12,11 +11,22 @@ Para mais informações acesse nossa página de integração:
 
 ## Setup
 
-Adicione o SDK nas pependências do seu aplicativo
+
+Adicione o JitPack repository em seu build.gradle (top level module):
+```gradle
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}
+```
+
+Adicione o SDK nas dependências do seu aplicativo
 
 ```gradle
 dependencies {
-    implementation "br.com.juno:DirectCheckout:0.0.1"
+    implementation "com.github.rafaeldalbosco:direct-checkout-android:1.0.2"
 }
 ```
 
@@ -35,6 +45,9 @@ No arquivo Manifest adicione a permissão de acesso à internet, e seu token pú
         <meta-data
                 android:name="br.com.juno.directcheckout.public_token"
                 android:value="YOUR_PUBLIC_TOKEN"/>
+        <meta-data
+                android:name="br.com.juno.directcheckout.public_token_sandbox"
+                android:value="YOUR_PUBLIC_TOKEN_SANDBOX"/>
 
             ...
 
@@ -43,7 +56,7 @@ No arquivo Manifest adicione a permissão de acesso à internet, e seu token pú
 </manifest>
 ```
 
-Na sua classe application inicilize o SDK:
+Na sua classe application inicialize o SDK:
 ```kotlin
 class MyApplication:Application(){
 
@@ -54,7 +67,7 @@ class MyApplication:Application(){
 }
 ```
 
-Para utlizar o ambiente de testes (Sandbox) basta passar false no segundo parâmetro (prod):
+Para utilizar o ambiente de testes (Sandbox) basta passar false no segundo parâmetro (prod):
 
 ```kotlin
 class MyApplication:Application(){
@@ -67,7 +80,7 @@ class MyApplication:Application(){
 ```
 
 
-##Utilização
+## Utilização
 
 
 Detalhamos a seguir um exemplo de utilização de nossa biblioteca de como obter o hash do cartão de crédito:
@@ -119,7 +132,8 @@ Caso esteja utilizando a linguagem Java:
 ```
 
 
-##Funções Auxiliares
+## Funções Auxiliares
+
 A biblioteca disponibilizada também possui uma série de métodos auxiliares para a validação de dados do cartão de crédito, conforme demonstrado a seguir:
 
 ```kotlin
@@ -135,7 +149,7 @@ A biblioteca disponibilizada também possui uma série de métodos auxiliares pa
   /* isValidCardData: Validação dos dados do cartão de crédito(retorna true se for válido) */
   DirectCheckout.isValidCardData(card)
 
-  /* getCardType: Obtem o tipo de cartão de crédito (bandeira) */
+  /* getCardType: Obtém o tipo de cartão de crédito (bandeira) */
   DirectCheckout.getCardType("9999999999999999")}
 
 ```
@@ -161,13 +175,21 @@ Algumas funções também podem ser acessadas diretamente da classe Card:
   /* isValidExpireDate: Valida data de expiração do cartão de crédito (retorna true se for válido) */
   card.validateExpireDate()
 
-  /* getCardType: Obtem o tipo de cartão de crédito (bandeira) */
+  /* getCardType: Obtém o tipo de cartão de crédito (bandeira) */
   card.getType()
 
 ```
+
+## Proguard
+```
+-keep class br.com.juno.** { *; }
+```
+
 
 ## Contato 
 
 Para mais informações entre em contato com a Juno:
 
 * https://juno.com.br/contato.html
+
+
