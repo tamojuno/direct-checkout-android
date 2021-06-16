@@ -198,13 +198,15 @@ object DirectCheckout {
 
     private fun loadPublicTokenMetadata(token: String?) {
         try {
-            if (!token.isNullOrEmpty()) {
-                publicToken = token
-            } else {
-                val ai = applicationContext.packageManager.getApplicationInfo(
-                    applicationContext.packageName, PackageManager.GET_META_DATA
-                )
-                if (!::publicToken.isInitialized) {
+            if (!::publicToken.isInitialized) {
+
+                if (!token.isNullOrEmpty()) {
+                    publicToken = token
+                } else {
+                    val ai = applicationContext.packageManager.getApplicationInfo(
+                        applicationContext.packageName, PackageManager.GET_META_DATA
+                    )
+
                     var tokenManifest = ai.metaData?.get(PUBLIC_TOKEN)
                     if (!prodEnvironment && ai.metaData.get(PUBLIC_TOKEN_SANDBOX) is String) {
                         tokenManifest = ai.metaData.get(PUBLIC_TOKEN_SANDBOX)
