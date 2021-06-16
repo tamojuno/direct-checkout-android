@@ -15,16 +15,25 @@ import br.com.juno.directcheckout.utils.Validate
 import br.com.juno.directcheckout.utils.Validate.NO_INITIALIZED
 import br.com.juno.directcheckout.utils.encrypt
 
-object  DirectCheckout{
+object DirectCheckout {
 
     private const val PUBLIC_TOKEN = "br.com.juno.directcheckout.public_token"
     private const val PUBLIC_TOKEN_SANDBOX = "br.com.juno.directcheckout.public_token_sandbox"
 
-    @JvmStatic private lateinit var applicationContext: Context
-    @JvmStatic private lateinit var publicToken: String
-    @JvmStatic private var prodEnvironment: Boolean = true
-    @JvmStatic private var publicKey: String ?= null
-    @JvmStatic private var sdkInitialized = false
+    @JvmStatic
+    private lateinit var applicationContext: Context
+
+    @JvmStatic
+    private lateinit var publicToken: String
+
+    @JvmStatic
+    private var prodEnvironment: Boolean = true
+
+    @JvmStatic
+    private var publicKey: String? = null
+
+    @JvmStatic
+    private var sdkInitialized = false
 
     /**
      * Initialize DirectCheckout SDK
@@ -33,12 +42,17 @@ object  DirectCheckout{
      */
     @JvmStatic
     @JvmOverloads
-    fun initialize(context: Context, prod:Boolean = true, listener:DirectCheckoutListener<Boolean>? = null){
+    fun initialize(
+        context: Context,
+        prod: Boolean = true,
+        token: String?,
+        listener: DirectCheckoutListener<Boolean>? = null
+    ) {
         Validate.notNull(context, "")
         Validate.hasInternetPermissions(context)
         prodEnvironment = prod
         applicationContext = context
-        loadPublicTokenMetadata()
+        loadPublicTokenMetadata(token)
         loadPublicKey(listener)
         sdkInitialized = true
     }
@@ -49,28 +63,28 @@ object  DirectCheckout{
      * @param listener - DirectCheckoutListener, a callback called when process finishes with success or fail
      */
     @JvmStatic
-    fun getCardHash(card: Card, listener: DirectCheckoutListener<String>){
+    fun getCardHash(card: Card, listener: DirectCheckoutListener<String>) {
 
-        if(!sdkInitialized){
-            listener.onFailure( DirectCheckoutException(NO_INITIALIZED))
+        if (!sdkInitialized) {
+            listener.onFailure(DirectCheckoutException(NO_INITIALIZED))
             return
         }
 
         onPublicKeyDone {
             val service = ApiFactory.makeRetrofitService(prodEnvironment)
             val thread = Thread(Runnable {
-                try{
-                    val response = service.getCardHash(publicToken, card.encrypt(publicKey?:""))
-                    if(response.success){
+                try {
+                    val response = service.getCardHash(publicToken, card.encrypt(publicKey ?: ""))
+                    if (response.success) {
                         Handler(Looper.getMainLooper()).post {
                             listener.onSuccess(response.data)
                         }
-                    }else{
+                    } else {
                         Handler(Looper.getMainLooper()).post {
                             listener.onFailure(DirectCheckoutException(getErrorMessage(response.errorMessage)))
                         }
                     }
-                }catch (e: Exception){
+                } catch (e: Exception) {
                     Handler(Looper.getMainLooper()).post {
                         listener.onFailure(DirectCheckoutException(e.message ?: "Network error"))
                     }
@@ -80,12 +94,12 @@ object  DirectCheckout{
         }
     }
 
-    private fun onPublicKeyDone(action : () -> Unit ){
-        if(publicKey == null){
+    private fun onPublicKeyDone(action: () -> Unit) {
+        if (publicKey == null) {
             Handler().postDelayed({ // Do something after 5s = 5000ms
                 onPublicKeyDone(action)
             }, 100)
-        }else{
+        } else {
             action()
         }
     }
@@ -96,8 +110,7 @@ object  DirectCheckout{
      * @return Boolean
      */
     @JvmStatic
-    fun isValidCardNumber(cardNumber:String)
-            = CardUtils.validateNumber(cardNumber)
+    fun isValidCardNumber(cardNumber: String) = CardUtils.validateNumber(cardNumber)
 
     /**
      * Get CardType (Label)
@@ -105,8 +118,7 @@ object  DirectCheckout{
      * @return Card type - Label
      */
     @JvmStatic
-    fun getCardType(cardNumber: String)
-            = CardUtils.getCardType(cardNumber)?.name
+    fun getCardType(cardNumber: String) = CardUtils.getCardType(cardNumber)?.name
 
     /**
      * Validate if security code is correct for card type
@@ -115,8 +127,8 @@ object  DirectCheckout{
      * @return Boolean
      */
     @JvmStatic
-    fun isValidSecurityCode(cardNumber: String, securityCode:String)
-            = CardUtils.validateCVC(cardNumber, securityCode)
+    fun isValidSecurityCode(cardNumber: String, securityCode: String) =
+        CardUtils.validateCVC(cardNumber, securityCode)
 
     /**
      * Validate if expiration date is Valid
@@ -125,8 +137,8 @@ object  DirectCheckout{
      * @return Boolean
      */
     @JvmStatic
-    fun isValidExpireDate(expirationMonth: String, expirationYear: String)
-            = CardUtils.validateExpireDate(expirationMonth, expirationYear)
+    fun isValidExpireDate(expirationMonth: String, expirationYear: String) =
+        CardUtils.validateExpireDate(expirationMonth, expirationYear)
 
     /**
      * Validate all card data
@@ -136,47 +148,47 @@ object  DirectCheckout{
      */
     @JvmStatic
     @Throws(DirectCheckoutException::class)
-    fun isValidCardData(card:Card):Boolean {
+    fun isValidCardData(card: Card): Boolean {
 
-        if(card.holderName.isEmpty()){
+        if (card.holderName.isEmpty()) {
             throw DirectCheckoutException("Invalid holder name")
         }
-        if(!CardUtils.validateNumber(card.cardNumber)){
+        if (!CardUtils.validateNumber(card.cardNumber)) {
             throw DirectCheckoutException("Invalid card number")
         }
 
-        if(!CardUtils.validateCVC(card.cardNumber, card.securityCode)){
+        if (!CardUtils.validateCVC(card.cardNumber, card.securityCode)) {
             throw DirectCheckoutException("Invalid security code")
         }
 
-        if(!CardUtils.validateExpireDate(card.expirationMonth, card.expirationYear)){
+        if (!CardUtils.validateExpireDate(card.expirationMonth, card.expirationYear)) {
             throw DirectCheckoutException("Invalid expire date")
         }
 
         return true
     }
 
-    private fun loadPublicKey(listener:DirectCheckoutListener<Boolean>? = null){
+    private fun loadPublicKey(listener: DirectCheckoutListener<Boolean>? = null) {
         val service = ApiFactory.makeRetrofitService(prodEnvironment)
         val thread = Thread(Runnable {
-            try{
+            try {
                 val response = service.getPublicKey(publicToken, BuildConfig.VERSION_NAME)
-                if(response.success){
+                if (response.success) {
                     publicKey = response.data
                     Handler(Looper.getMainLooper()).post {
                         listener?.onSuccess(true)
                     }
 
-                }else{
+                } else {
                     Handler(Looper.getMainLooper()).post {
                         listener?.onFailure(DirectCheckoutException(getErrorMessage(response.errorMessage)))
                     }
                     sdkInitialized = false
                 }
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 e.printStackTrace()
                 Handler(Looper.getMainLooper()).post {
-                    listener?.onFailure(DirectCheckoutException(e.message?: "Network error"))
+                    listener?.onFailure(DirectCheckoutException(e.message ?: "Network error"))
                 }
                 sdkInitialized = false
             }
@@ -184,38 +196,40 @@ object  DirectCheckout{
         thread.start()
     }
 
-    private fun loadPublicTokenMetadata(){
-
+    private fun loadPublicTokenMetadata(token: String?) {
         try {
-            val ai = applicationContext.packageManager.getApplicationInfo(
-                applicationContext.packageName, PackageManager.GET_META_DATA
-            )
-            if (!::publicToken.isInitialized) {
-                var token = ai.metaData?.get(PUBLIC_TOKEN)
-                if (!prodEnvironment && ai.metaData.get(PUBLIC_TOKEN_SANDBOX) is String) {
-                    token = ai.metaData.get(PUBLIC_TOKEN_SANDBOX)
-                }
-                if (token is String) {
-                    publicToken = token
-                } else {
-                    throw DirectCheckoutException(Validate.NO_PUBLIC_TOKEN)
+            if (!token.isNullOrEmpty()) {
+                publicToken = token
+            } else {
+                val ai = applicationContext.packageManager.getApplicationInfo(
+                    applicationContext.packageName, PackageManager.GET_META_DATA
+                )
+                if (!::publicToken.isInitialized) {
+                    var tokenManifest = ai.metaData?.get(PUBLIC_TOKEN)
+                    if (!prodEnvironment && ai.metaData.get(PUBLIC_TOKEN_SANDBOX) is String) {
+                        tokenManifest = ai.metaData.get(PUBLIC_TOKEN_SANDBOX)
+                    }
+                    if (tokenManifest is String) {
+                        publicToken = tokenManifest
+                    } else {
+                        throw DirectCheckoutException(Validate.NO_PUBLIC_TOKEN)
+                    }
                 }
             }
-
         } catch (e: Exception) {
             throw DirectCheckoutException(Validate.NO_PUBLIC_TOKEN)
         }
     }
 
-    private fun validateInitialize(){
-        if(!sdkInitialized){
+    private fun validateInitialize() {
+        if (!sdkInitialized) {
             throw DirectCheckoutException(NO_INITIALIZED)
         }
     }
 
-    private fun getErrorMessage(errorMessage: String) : String {
+    private fun getErrorMessage(errorMessage: String): String {
         return if (Build.VERSION.SDK_INT >= 24) {
-            Html.fromHtml(errorMessage , Html.FROM_HTML_MODE_LEGACY)
+            Html.fromHtml(errorMessage, Html.FROM_HTML_MODE_LEGACY)
         } else {
             Html.fromHtml(errorMessage)
         }.toString()
