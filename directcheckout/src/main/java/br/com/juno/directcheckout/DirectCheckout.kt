@@ -203,13 +203,13 @@ object DirectCheckout {
                 if (!token.isNullOrEmpty()) {
                     publicToken = token
                 } else {
-                    val ai = applicationContext.packageManager.getApplicationInfo(
+                    val applicationInfo = applicationContext.packageManager.getApplicationInfo(
                         applicationContext.packageName, PackageManager.GET_META_DATA
                     )
 
-                    var tokenManifest = ai.metaData?.get(PUBLIC_TOKEN)
-                    if (!prodEnvironment && ai.metaData.get(PUBLIC_TOKEN_SANDBOX) is String) {
-                        tokenManifest = ai.metaData.get(PUBLIC_TOKEN_SANDBOX)
+                    var tokenManifest = applicationInfo.metaData?.get(PUBLIC_TOKEN)
+                    if (!prodEnvironment && applicationInfo.metaData.get(PUBLIC_TOKEN_SANDBOX) is String) {
+                        tokenManifest = applicationInfo.metaData.get(PUBLIC_TOKEN_SANDBOX)
                     }
                     if (tokenManifest is String) {
                         publicToken = tokenManifest
